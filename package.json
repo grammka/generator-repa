@@ -1,0 +1,40 @@
+{
+  "name": "generator-repa",
+  "version": "0.0.4",
+  "description": "Yeoman generator for React.js projects (TVEVT) based on generating Components, Actions, Reducers, etc",
+  "homepage": "https://github.com/grammka/generator-repa#readme",
+  "author": {
+    "name": "Pavel Ivanov",
+    "email": "grammka@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grammka/generator-repa.git"
+  },
+  "bugs": {
+    "url": "https://github.com/grammka/generator-repa/issues"
+  },
+  "keywords": [
+    "yeoman-generator",
+    "React",
+    "Component",
+    "Action",
+    "Reducer",
+    "generator"
+  ],
+  "license": "MIT",
+  "main": "./lib/index.js",
+  "files": [
+    "generators/app",
+    "generators/router"
+  ],
+  "scripts": {
+    "start": "node ./src",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "yeoman-generator": "^0.23.4",
+    "mkdirp": "^0.5.1"
+  },
+  "devDependencies": {}
+}
