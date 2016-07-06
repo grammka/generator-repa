@@ -1,53 +1,11 @@
-const fs            = require('fs');
 const path          = require('path');
 const mkdirp        = require('mkdirp');
 const Generators    = require('yeoman-generator');
-const inquirer      = require('inquirer');
 
-const genComponent  = require('./genComponent');
-const genStyle      = require('./genStyle');
-
-
-function createComponentFolder(name) {
-  const folderPath = path.join(this.config.get('componentsPath'), name.charAt(0).toUpperCase() + name.slice(1));
-
-  fs.mkdir(folderPath, function (err) {
-    if (err) {
-      return console.log(err);
-    }
-  });
-
-  return folderPath;
-}
-
-function createComponent(folderPath, name, styles) {
-  const jsPath      = path.join(folderPath, 'index.js');
-  const content     = genComponent({
-                      componentName: name,
-                      isStylesNeeded: styles
-                    });
-
-  fs.writeFile(jsPath, content, function (err) {
-    if (err) {
-      return console.log(err);
-    }
-  });
-}
-
-function createStyles(folderPath) {
-  const toPath      = path.join(folderPath, 'style.css');
-  const content     = genStyle();
-
-  fs.writeFile(toPath, content, function (err) {
-    if (err) {
-      return console.log(err);
-    }
-  });
-}
 
 module.exports = Generators.Base.extend({
-  config: function() {
-    this.config.save();
+  initializing: function () {
+    this.props = {};
   },
 
   prompting: function () {
@@ -58,7 +16,7 @@ module.exports = Generators.Base.extend({
       console.log('Let\'s configure paths');
     }
     
-    self.prompt([
+    return self.prompt([
       {
         type: 'input',
         name: 'componentsPath',
@@ -114,13 +72,8 @@ module.exports = Generators.Base.extend({
               }
             ])
               .then(function (answers) {
-                const folderPath = createComponentFolder.call(self, answers.name);
-
-                createComponent.call(self, folderPath, answers.name, answers.styles);
-
-                if (answers.styles) {
-                  createStyles.call(self, folderPath);
-                }
+                answers.creation = 'Component';
+                self.props.answers = answers;
               });
 
           case 'Action':
@@ -128,5 +81,58 @@ module.exports = Generators.Base.extend({
             break;
         }
       });
+  },
+
+  configuring: function() {
+    this.config.save();
+  },
+  
+  writing: {
+    createFoldersByConfigPaths: function () {
+      const componentsPath  = this.config.get('componentsPath');
+      const actionsPath     = this.config.get('actionsPath');
+      const reducersPath    = this.config.get('reducersPath');
+      const paths           = [ componentsPath, actionsPath, reducersPath ];
+
+      for (var i = 0; i < paths.length; i++) {
+        var path = this.destinationPath(paths[i]);
+
+        if (!this.fs.exists(path)){
+          mkdirp(path, function (err) {
+            if (err) {
+              return console.log(err);
+            }
+          });
+        }
+      }
+    },
+
+    components: function () {
+      const { answers } = this.props;
+      const { creation, name, styles } = answers;
+      
+      if (creation == 'Component') {
+        const componentsPath        = this.config.get('componentsPath');
+        const capitilizedName       = name.charAt(0).toUpperCase() + name.slice(1);
+        const componentFolderPath   = path.join(componentsPath, capitilizedName);
+
+        this.fs.copyTpl(
+          this.templatePath('component.js'),
+          this.destinationPath(`${componentFolderPath}/index.js`),
+          { name: name }
+        );
+
+        if (styles) {
+          this.fs.copyTpl(
+            this.templatePath('style.css'),
+            this.destinationPath(`${componentFolderPath}/style.css`)
+          );
+        }
+      }
+    }
+  },
+
+  end: function () {
+  	console.log('Smth else?');
   }
 });

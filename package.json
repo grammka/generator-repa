@@ -1,6 +1,6 @@
 {
   "name": "generator-repa",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "Yeoman generator for React.js projects (TVEVT) based on generating Components, Actions, Reducers, etc",
   "homepage": "https://github.com/grammka/generator-repa#readme",
   "author": {
