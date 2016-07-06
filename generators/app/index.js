@@ -3,6 +3,7 @@ const path          = require('path');
 const mkdirp        = require('mkdirp');
 const Generators    = require('yeoman-generator');
 const prompts       = require('./prompts');
+const components    = require('./components');
 
 
 module.exports = Generators.Base.extend({
@@ -13,6 +14,8 @@ module.exports = Generators.Base.extend({
   prompting: function () {
     const self    = this;
     const config  = self.config.getAll();
+    
+    console.log(this);
     
     if (!config || !config.componentsPath || !config.actionsPath || !config.reducersPath) {
       console.log('Let\'s configure paths');
@@ -25,46 +28,7 @@ module.exports = Generators.Base.extend({
         if (answers.reducersPath)   self.config.set('reducersPath', answers.reducersPath);
 
         if (answers.creation == 'Component') {
-          return (function askComponent() {
-            return self.prompt([
-              {
-                type: 'input',
-                name: 'componentName',
-                message: 'Write Component name:'
-              }
-            ])
-              .then(function ({ componentName }) {
-                const componentsPath        = self.config.get('componentsPath');
-                const capitilizedName       = componentName.charAt(0).toUpperCase() + componentName.slice(1);
-                const componentFolderPath   = path.join(componentsPath, capitilizedName);
-
-                return new Promise((resolve) => {
-                  fs.access(self.destinationPath(componentFolderPath), (err) => {
-                    if (!err) {
-                      console.log('This Component already exist');
-                      resolve(askComponent());
-                    } else {
-                      resolve(
-                        self.prompt([
-                          {
-                            type: 'confirm',
-                            name: 'stylesExist',
-                            message: 'Do you need Styles?'
-                          }
-                        ])
-                        .then(function ({ stylesExist }) {
-                          self.props.answers = {
-                            creation: 'Component',
-                            name: componentName,
-                            styles: stylesExist
-                          };
-                        })
-                      );
-                    }
-                  });
-                });
-              });
-          })()
+          return components.questions.call(self);
         }
         else if (answers.creation == 'Action') {
 
@@ -75,7 +39,7 @@ module.exports = Generators.Base.extend({
       });
   },
 
-  configuring: function() {
+  configuring: function () {
     this.config.save();
   },
   
